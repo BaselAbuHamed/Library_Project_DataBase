@@ -264,3 +264,126 @@ CLOSE SYMMETRIC KEY ProjectSymmetricKey;
 
   <p>These encryption objects help protect sensitive data stored in the SQL Server database. They ensure that data is encrypted when stored and can only be decrypted with the appropriate keys and certificates.</p>
 </body>
+
+***
+
+<html>
+<head>
+  <title>SQL User and Role Permissions</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h2>SQL User and Role Permissions</h2>
+  <table>
+    <tr>
+      <th>SQL Commands</th>
+      <th>Explanation</th>
+    </tr>
+    <tr>
+      <td>
+        CREATE LOGIN basel WITH PASSWORD = 'basel123';<br>
+        CREATE USER basel FOR LOGIN basel;<br>
+        CREATE ROLE BranchManager;<br>
+        ALTER ROLE BranchManager ADD MEMBER basel;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Branch TO BranchManager WITH GRANT OPTION;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Staff TO BranchManager WITH GRANT OPTION;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Supervisor TO BranchManager WITH GRANT OPTION;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON BranchManager TO BranchManager WITH GRANT OPTION;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Member TO BranchManager WITH GRANT OPTION;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Book TO BranchManager WITH GRANT OPTION;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON BookCopy TO BranchManager WITH GRANT OPTION;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Rental TO BranchManager WITH GRANT OPTION;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Feedback TO BranchManager WITH GRANT OPTION;<br>
+        SELECT * FROM sys.database_principals WHERE name = 'BranchManager';
+      </td>
+      <td>
+        <b>Explanation:</b><br>
+        The above SQL commands create a login 'basel' with a password and create a user 'basel' associated with this login. Then, a role named 'BranchManager' is created and 'basel' is added as a member of this role.<br>
+        Further, various permissions are granted to the 'BranchManager' role using the GRANT statement with the WITH GRANT OPTION. This allows the 'BranchManager' to grant the same permissions to other users and roles.<br>
+        The last SELECT statement shows the details of the 'BranchManager' role using the sys.database_principals system view.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        CREATE LOGIN [fade] WITH PASSWORD = 'fade123';<br>
+        CREATE USER [fade] FOR LOGIN [fade];<br>
+        CREATE ROLE StaffSupervisor;<br>
+        ALTER ROLE StaffSupervisor ADD MEMBER fade;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Branch TO StaffSupervisor;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Staff TO StaffSupervisor;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Supervisor TO StaffSupervisor;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Member TO StaffSupervisor;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Book TO StaffSupervisor;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON BookCopy TO StaffSupervisor;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Rental TO StaffSupervisor;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Feedback TO StaffSupervisor;<br>
+        SELECT * FROM sys.database_principals WHERE name = 'StaffSupervisor';
+      </td>
+      <td>
+        <b>Explanation:</b><br>
+        These SQL commands create a login '[fade]' with a password and a user '[fade]' associated with this login. Then, a role named 'StaffSupervisor' is created and '[fade]' is added as a member of this role.<br>
+        Subsequently, the GRANT statement is used to provide various permissions to the 'StaffSupervisor' role. These permissions allow the 'StaffSupervisor' to perform SELECT, INSERT, UPDATE, and DELETE operations on specific database objects.<br>
+        Finally, the SELECT statement shows the details of the 'StaffSupervisor' role using the sys.database_principals system view.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        CREATE LOGIN [Alamleh] WITH PASSWORD = 'Alamlehl123';<br>
+        CREATE USER [Alamleh] FOR LOGIN [Alamleh];<br>
+        CREATE ROLE Librarian;<br>
+        ALTER ROLE Librarian ADD MEMBER Alamleh;<br>
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Branch TO Librarian;<br>
+        GRANT SELECT, INSERT, UPDATE ON Staff TO Librarian;<br>
+        GRANT SELECT ON Supervisor TO Librarian;<br>
+        GRANT SELECT ON BranchManager TO Librarian;<br>
+        GRANT SELECT ON Member TO Librarian;<br>
+        GRANT SELECT, INSERT, UPDATE ON Book TO Librarian;<br>
+        GRANT SELECT, INSERT, UPDATE ON BookCopy TO Librarian;<br>
+        GRANT SELECT, INSERT, UPDATE ON Rental TO Librarian;<br>
+        GRANT SELECT ON Feedback TO Librarian;<br>
+        SELECT * FROM sys.database_principals WHERE name = 'Librarian';
+      </td>
+      <td>
+        <b>Explanation:</b><br>
+        The SQL commands create a login '[Alamleh]' with a password and a user '[Alamleh]' associated with this login. Next, a role named 'Librarian' is created and '[Alamleh]' is added as a member of this role.<br>
+        The GRANT statement is used to provide various permissions to the 'Librarian' role. The 'Librarian' role has SELECT, INSERT, UPDATE, and DELETE permissions on specific database objects, enabling them to manage books, members, and more.<br>
+        Lastly, the SELECT statement shows the details of the 'Librarian' role using the sys.database_principals system view.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        CREATE LOGIN [ahmaed] WITH PASSWORD = 'ahmaedl123';<br>
+        CREATE USER [ahmaed] FOR LOGIN [ahmaed];<br>
+        CREATE ROLE Staff_Member;<br>
+        ALTER ROLE Staff_Member ADD MEMBER ahmaed;<br>
+        GRANT SELECT ON Branch TO [Staff_Member];<br>
+        GRANT SELECT ON Staff TO [Staff_Member];<br>
+        GRANT SELECT, INSERT ON Member TO [Staff_Member];<br>
+        GRANT SELECT ON Book TO [Staff_Member];<br>
+        GRANT SELECT ON BookCopy TO [Staff_Member];<br>
+        GRANT SELECT ON Rental TO [Staff_Member];<br>
+        SELECT * FROM sys.database_principals WHERE name = 'Staff_Member';
+      </td>
+      <td>
+        <b>Explanation:</b><br>
+        These SQL commands create a login '[ahmaed]' with a password and a user '[ahmaed]' associated with this login. Then, a role named 'Staff_Member' is created, and '[ahmaed]' is added as a member of this role.<br>
+        The GRANT statement provides various permissions to the 'Staff_Member' role. This role has SELECT permissions on the 'Branch', 'Staff', 'Member', 'Book', 'BookCopy', and 'Rental' database objects, allowing them to view and access data.<br>
+        Finally, the SELECT statement shows the details of the 'Staff_Member' role using the sys.database_principals system view.
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
