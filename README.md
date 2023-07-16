@@ -131,24 +131,23 @@ The project aims to streamline operations, enhance customer experiences, and eff
           AS
           BEGIN
             DECLARE @memberId INT, @bookId INT;
-
             -- Get the member ID and book ID from the inserted rows
             SELECT @memberId = member_id, @bookId = book_id
             FROM inserted;
 
-            -- Check if the member has already inserted feedback for the book
+ -- Check if the member has already inserted feedback for the book
             IF EXISTS (
               SELECT 1
               FROM Feedback
               WHERE member_id = @memberId AND book_id = @bookId
             )
             BEGIN
-              -- Display an error message
+ -- Display an error message
               PRINT 'You have already provided feedback for this book.';
             END;
             ELSE
             BEGIN
-              -- Insert the feedback into the table
+-- Insert the feedback into the table
               INSERT INTO Feedback (member_id, book_id, rating, comment)
               SELECT member_id, book_id, rating, comment
               FROM inserted;
@@ -159,7 +158,7 @@ The project aims to streamline operations, enhance customer experiences, and eff
       </td>
     </tr>
     <tr>
-      <td>UpdateLimitBook</td>
+<td>UpdateLimitBook</td>
       <td>Instead of insert trigger on the 'Rental' table to enforce the limit of 5 books per member. The trigger checks if the member has reached the maximum limit and if the book is available for rent. If any condition is not met, the rental transaction is rolled back, and an error message is displayed.</td>
       <td>
         <code>
@@ -171,11 +170,11 @@ The project aims to streamline operations, enhance customer experiences, and eff
             -- Variables
             DECLARE @member_id INT, @book_id INT, @rental_count INT;
 
-            -- Get the inserted member_id and book_id
+-- Get the inserted member_id and book_id
             SELECT @member_id = member_id, @book_id = book_id
             FROM inserted;
 
-            -- Check if the member has reached the maximum limit of 5 books
+-- Check if the member has reached the maximum limit of 5 books
             SELECT @rental_count = limit_book FROM Member WHERE member_id = @member_id;
             IF @rental_count >= 5
             BEGIN
@@ -184,7 +183,7 @@ The project aims to streamline operations, enhance customer experiences, and eff
               RETURN;
             END;
 
-            -- Check if the member has already rented the same book
+-- Check if the member has already rented the same book
             IF EXISTS (SELECT 1 FROM Rental WHERE member_id = @member_id AND book_id = @book_id)
             BEGIN
               RAISERROR('This member has already rented this book. Rental transaction is not allowed.', 16, 1);
@@ -192,7 +191,7 @@ The project aims to streamline operations, enhance customer experiences, and eff
               RETURN;
             END;
 
-            -- Check if there are available copies of the book
+-- Check if there are available copies of the book
             DECLARE @copy_count INT;
             SELECT @copy_count = COUNT(*) FROM BookCopy WHERE book_id = @book_id AND copy_number > 0;
             IF @copy_count = 0
@@ -202,7 +201,7 @@ The project aims to streamline operations, enhance customer experiences, and eff
               RETURN;
             END;
 
-            -- Increment the limit_book column for the member
+-- Increment the limit_book column for the member
             UPDATE Member
             SET limit_book = limit_book + 1
             WHERE member_id = @member_id;
@@ -212,14 +211,14 @@ The project aims to streamline operations, enhance customer experiences, and eff
             SET copy_number = copy_number - 1
             WHERE book_id = @book_id;
 
-            PRINT 'Book rented successfully.';
+PRINT 'Book rented successfully.';
           END;
         </code>
       </td>
     </tr>
     <tr>
-      <td>returnBook</td>
-      <td>After updating the 'return_date' column in the 'Rental' table, this trigger decrements the 'limit_book' for the respective member and increments the 'copy_number' for the returned book in the 'BookCopy' table.</td>
+<td>returnBook</td>
+<td>After updating the 'return_date' column in the 'Rental' table, this trigger decrements the 'limit_book' for the respective member and increments the 'copy_number' for the returned book in the 'BookCopy' table.</td>
       <td>
         <code>
           CREATE TRIGGER returnBook
@@ -230,24 +229,24 @@ The project aims to streamline operations, enhance customer experiences, and eff
             -- Variables
             DECLARE @member_id INT, @book_id INT;
 
-            -- Check if the return_date column has been updated
+-- Check if the return_date column has been updated
             IF UPDATE(return_date)
             BEGIN
               -- Get the member_id and book_id for the updated rental
               SELECT @member_id = member_id, @book_id = book_id
               FROM deleted;
 
-              -- Decrement the limit_book column for the member
+-- Decrement the limit_book column for the member
               UPDATE Member
               SET limit_book = limit_book - 1
               WHERE member_id = @member_id;
 
-              -- Increment the book_copy by one
+-- Increment the book_copy by one
               UPDATE BookCopy
               SET copy_number = copy_number + 1
               WHERE book_id = @book_id;
 
-              PRINT 'Book returned successfully.';
+PRINT 'Book returned successfully.';
             END;
           END;
         </code>
@@ -267,11 +266,10 @@ The project aims to streamline operations, enhance customer experiences, and eff
             DECLARE @book_id INT;
             DECLARE @copy_number INT;
 
-            -- Get the book_id and copy_number for the inserted book copy
+-- Get the book_id and copy_number for the inserted book copy
             SELECT @book_id = book_id, @copy_number = copy_number
             FROM inserted;
-
-            -- Check if the copy number is 0
+-- Check if the copy number is 0
             IF @copy_number = 0
             BEGIN
               -- Print a message indicating no copies are available
