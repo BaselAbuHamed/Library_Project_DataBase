@@ -373,4 +373,4 @@ CLOSE SYMMETRIC KEY ProjectSymmetricKey;
 
 ***
 ## Special thanks
-* For <strong>Dr. Abdallah Alnatsha</strong>on his great efforts during this course!.
+* For <strong>Dr. Abdallah Alnatsha </strong>on his great efforts during this course!.
