@@ -68,185 +68,219 @@ The project aims to streamline operations, enhance customer experiences, and eff
 </body>
 
 ***
+
+<head>
+  <title>AlBayan SQL Triggers</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
 <body>
   <h1>SQL Triggers</h1>
-  <ul>
-    <li>
-      <h2>UpdateRentCost</h2>
-      <p>Description: After updating the 'return_date' column in the 'Rental' table, this trigger calculates and updates the 'rent_cost' based on the rental period. Rentals within 14 days have a cost of 10 units per day, and rentals after 14 days have an additional 15 units per day.</p>
-      <code>
-        CREATE TRIGGER UpdateRentCost
-        ON Rental
-        AFTER UPDATE
-        AS
-        BEGIN
-          -- Check if the 'return_date' column is updated
-          IF UPDATE(return_date)
+  <table>
+    <tr>
+      <th>Trigger Name</th>
+      <th>Description</th>
+      <th>SQL Code</th>
+    </tr>
+    <tr>
+      <td>UpdateRentCost</td>
+      <td>After updating the 'return_date' column in the 'Rental' table, this trigger calculates and updates the 'rent_cost' based on the rental period. Rentals within 14 days have a cost of 10 units per day, and rentals after 14 days have an additional 15 units per day.</td>
+      <td>
+        <code>
+          CREATE TRIGGER UpdateRentCost
+          ON Rental
+          AFTER UPDATE
+          AS
           BEGIN
-            -- Update the 'rent_cost' column based on the rental period
-            UPDATE r
-            SET r.rent_cost = CASE
-              WHEN DATEDIFF(DAY, r.rental_date, r.return_date) <= 14 THEN DATEDIFF(DAY, r.rental_date, r.return_date) * 10
-              ELSE (14 * 10) + ((DATEDIFF(DAY, r.rental_date, r.return_date) - 14) * 15)
+            -- Check if the 'return_date' column is updated
+            IF UPDATE(return_date)
+            BEGIN
+              -- Update the 'rent_cost' column based on the rental period
+              UPDATE r
+              SET r.rent_cost = CASE
+                WHEN DATEDIFF(DAY, r.rental_date, r.return_date) <= 14 THEN DATEDIFF(DAY, r.rental_date, r.return_date) * 10
+                ELSE (14 * 10) + ((DATEDIFF(DAY, r.rental_date, r.return_date) - 14) * 15)
+              END
+              FROM Rental AS r
+              JOIN inserted AS i ON r.rental_id = i.rental_id;
             END
-            FROM Rental AS r
-            JOIN inserted AS i ON r.rental_id = i.rental_id;
-          END
-        END;
-      </code>
-    </li>
-    <li>
-      <h2>FeedbackTrigger</h2>
-      <p>Description: Instead of insert trigger on the 'Feedback' table to prevent duplicate feedback. If a member tries to provide feedback for the same book more than once, an error message will be displayed, and the insert operation will be blocked.</p>
-      <code>
-        CREATE TRIGGER FeedbackTrigger
-        ON Feedback
-        INSTEAD OF INSERT
-        AS
-        BEGIN
-          DECLARE @memberId INT, @bookId INT;
-
-          -- Get the member ID and book ID from the inserted rows
-          SELECT @memberId = member_id, @bookId = book_id
-          FROM inserted;
-
-          -- Check if the member has already inserted feedback for the book
-          IF EXISTS (
-            SELECT 1
-            FROM Feedback
-            WHERE member_id = @memberId AND book_id = @bookId
-          )
-          BEGIN
-            -- Display an error message
-            PRINT 'You have already provided feedback for this book.';
           END;
-          ELSE
+        </code>
+      </td>
+    </tr>
+    <tr>
+      <td>FeedbackTrigger</td>
+      <td>Instead of insert trigger on the 'Feedback' table to prevent duplicate feedback. If a member tries to provide feedback for the same book more than once, an error message will be displayed, and the insert operation will be blocked.</td>
+      <td>
+        <code>
+          CREATE TRIGGER FeedbackTrigger
+          ON Feedback
+          INSTEAD OF INSERT
+          AS
           BEGIN
-            -- Insert the feedback into the table
-            INSERT INTO Feedback (member_id, book_id, rating, comment)
-            SELECT member_id, book_id, rating, comment
+            DECLARE @memberId INT, @bookId INT;
+
+            -- Get the member ID and book ID from the inserted rows
+            SELECT @memberId = member_id, @bookId = book_id
             FROM inserted;
-            PRINT 'Data inserted successfully.';
+
+            -- Check if the member has already inserted feedback for the book
+            IF EXISTS (
+              SELECT 1
+              FROM Feedback
+              WHERE member_id = @memberId AND book_id = @bookId
+            )
+            BEGIN
+              -- Display an error message
+              PRINT 'You have already provided feedback for this book.';
+            END;
+            ELSE
+            BEGIN
+              -- Insert the feedback into the table
+              INSERT INTO Feedback (member_id, book_id, rating, comment)
+              SELECT member_id, book_id, rating, comment
+              FROM inserted;
+              PRINT 'Data inserted successfully.';
+            END;
           END;
-        END;
-      </code>
-    </li>
-    <li>
-      <h2>UpdateLimitBook</h2>
-      <p>Description: Instead of insert trigger on the 'Rental' table to enforce the limit of 5 books per member. The trigger checks if the member has reached the maximum limit and if the book is available for rent. If any condition is not met, the rental transaction is rolled back and an error message is displayed.</p>
-      <code>
-        CREATE TRIGGER UpdateLimitBook
-        ON Rental
-        INSTEAD OF INSERT
-        AS
-        BEGIN
-          -- Variables
-          DECLARE @member_id INT, @book_id INT, @rental_count INT;
-
-          -- Get the inserted member_id and book_id
-          SELECT @member_id = member_id, @book_id = book_id
-          FROM inserted;
-
-          -- Check if the member has reached the maximum limit of 5 books
-          SELECT @rental_count = limit_book FROM Member WHERE member_id = @member_id;
-          IF @rental_count >= 5
+        </code>
+      </td>
+    </tr>
+    <tr>
+      <td>UpdateLimitBook</td>
+      <td>Instead of insert trigger on the 'Rental' table to enforce the limit of 5 books per member. The trigger checks if the member has reached the maximum limit and if the book is available for rent. If any condition is not met, the rental transaction is rolled back, and an error message is displayed.</td>
+      <td>
+        <code>
+          CREATE TRIGGER UpdateLimitBook
+          ON Rental
+          INSTEAD OF INSERT
+          AS
           BEGIN
-            RAISERROR('Maximum limit of 5 books reached for this member. Rental transaction is not allowed.', 16, 1);
-                ROLLBACK;
-            RETURN;
-          END;
+            -- Variables
+            DECLARE @member_id INT, @book_id INT, @rental_count INT;
 
-          -- Check if the member has already rented the same book
-          IF EXISTS (SELECT 1 FROM Rental WHERE member_id = @member_id AND book_id = @book_id)
-          BEGIN
-            RAISERROR('This member has already rented this book. Rental transaction is not allowed.', 16, 1);
-                ROLLBACK;
-            RETURN;
-          END;
-
-          -- Check if there are available copies of the book
-          DECLARE @copy_count INT;
-          SELECT @copy_count = COUNT(*) FROM BookCopy WHERE book_id = @book_id AND copy_number > 0;
-          IF @copy_count = 0
-          BEGIN
-            RAISERROR('No copies available for this book. Rental transaction is not allowed.', 16, 1);
-                ROLLBACK;
-            RETURN;
-          END;
-
-          -- Increment the limit_book column for the member
-          UPDATE Member
-          SET limit_book = limit_book + 1
-          WHERE member_id = @member_id;
-          print @book_id;
-          -- Decrement the book_copy by one
-          UPDATE BookCopy
-          SET copy_number = copy_number - 1
-          WHERE book_id = @book_id;
-
-          PRINT 'Book rented successfully.';
-        END;
-      </code>
-    </li>
-    <li>
-      <h2>returnBook</h2>
-      <p>Description: After updating the 'return_date' column in the 'Rental' table, this trigger decrements the 'limit_book' for the respective member and increments the 'copy_number' for the returned book in the 'BookCopy' table.</p>
-      <code>
-        CREATE TRIGGER returnBook
-        ON Rental
-        AFTER UPDATE
-        AS
-        BEGIN
-          -- Variables
-          DECLARE @member_id INT, @book_id INT;
-
-          -- Check if the return_date column has been updated
-          IF UPDATE(return_date)
-          BEGIN
-            -- Get the member_id and book_id for the updated rental
+            -- Get the inserted member_id and book_id
             SELECT @member_id = member_id, @book_id = book_id
-            FROM deleted;
+            FROM inserted;
 
-            -- Decrement the limit_book column for the member
+            -- Check if the member has reached the maximum limit of 5 books
+            SELECT @rental_count = limit_book FROM Member WHERE member_id = @member_id;
+            IF @rental_count >= 5
+            BEGIN
+              RAISERROR('Maximum limit of 5 books reached for this member. Rental transaction is not allowed.', 16, 1);
+                  ROLLBACK;
+              RETURN;
+            END;
+
+            -- Check if the member has already rented the same book
+            IF EXISTS (SELECT 1 FROM Rental WHERE member_id = @member_id AND book_id = @book_id)
+            BEGIN
+              RAISERROR('This member has already rented this book. Rental transaction is not allowed.', 16, 1);
+                  ROLLBACK;
+              RETURN;
+            END;
+
+            -- Check if there are available copies of the book
+            DECLARE @copy_count INT;
+            SELECT @copy_count = COUNT(*) FROM BookCopy WHERE book_id = @book_id AND copy_number > 0;
+            IF @copy_count = 0
+            BEGIN
+              RAISERROR('No copies available for this book. Rental transaction is not allowed.', 16, 1);
+                  ROLLBACK;
+              RETURN;
+            END;
+
+            -- Increment the limit_book column for the member
             UPDATE Member
-            SET limit_book = limit_book - 1
+            SET limit_book = limit_book + 1
             WHERE member_id = @member_id;
-
-            -- Increment the book_copy by one
+            print @book_id;
+            -- Decrement the book_copy by one
             UPDATE BookCopy
-            SET copy_number = copy_number + 1
+            SET copy_number = copy_number - 1
             WHERE book_id = @book_id;
 
-            PRINT 'Book returned successfully.';
+            PRINT 'Book rented successfully.';
           END;
-        END;
-      </code>
-    </li>
-    <li>
-      <h2>CheckCopyAvailability</h2>
-      <p>Description: After inserting a new book copy into the 'BookCopy' table, this trigger checks if the 'copy_number' is 0. If so, it prints a message indicating that no copies are available for that book.</p>
-      <code>
-        CREATE TRIGGER CheckCopyAvailability
-        ON BookCopy
-        AFTER INSERT
-        AS
-        BEGIN
-          -- Variables
-          DECLARE @book_id INT;
-          DECLARE @copy_number INT;
-
-          -- Get the book_id and copy_number for the inserted book copy
-          SELECT @book_id = book_id, @copy_number = copy_number
-          FROM inserted;
-
-          -- Check if the copy number is 0
-          IF @copy_number = 0
+        </code>
+      </td>
+    </tr>
+    <tr>
+      <td>returnBook</td>
+      <td>After updating the 'return_date' column in the 'Rental' table, this trigger decrements the 'limit_book' for the respective member and increments the 'copy_number' for the returned book in the 'BookCopy' table.</td>
+      <td>
+        <code>
+          CREATE TRIGGER returnBook
+          ON Rental
+          AFTER UPDATE
+          AS
           BEGIN
-            -- Print a message indicating no copies are available
-            PRINT 'No copies available for Book ID: ' + CAST(@book_id AS VARCHAR(10));
+            -- Variables
+            DECLARE @member_id INT, @book_id INT;
+
+            -- Check if the return_date column has been updated
+            IF UPDATE(return_date)
+            BEGIN
+              -- Get the member_id and book_id for the updated rental
+              SELECT @member_id = member_id, @book_id = book_id
+              FROM deleted;
+
+              -- Decrement the limit_book column for the member
+              UPDATE Member
+              SET limit_book = limit_book - 1
+              WHERE member_id = @member_id;
+
+              -- Increment the book_copy by one
+              UPDATE BookCopy
+              SET copy_number = copy_number + 1
+              WHERE book_id = @book_id;
+
+              PRINT 'Book returned successfully.';
+            END;
           END;
-        END;
-      </code>
-    </li>
-  </ul>
+        </code>
+      </td>
+    </tr>
+    <tr>
+      <td>CheckCopyAvailability</td>
+      <td>After inserting a new book copy into the 'BookCopy' table, this trigger checks if the 'copy_number' is 0. If so, it prints a message indicating that no copies are available for that book.</td>
+      <td>
+        <code>
+          CREATE TRIGGER CheckCopyAvailability
+          ON BookCopy
+          AFTER INSERT
+          AS
+          BEGIN
+            -- Variables
+            DECLARE @book_id INT;
+            DECLARE @copy_number INT;
+
+            -- Get the book_id and copy_number for the inserted book copy
+            SELECT @book_id = book_id, @copy_number = copy_number
+            FROM inserted;
+
+            -- Check if the copy number is 0
+            IF @copy_number = 0
+            BEGIN
+              -- Print a message indicating no copies are available
+              PRINT 'No copies available for Book ID: ' + CAST(@book_id AS VARCHAR(10));
+            END;
+          END;
+        </code>
+      </td>
+    </tr>
+  </table>
 </body>
+
