@@ -370,3 +370,7 @@ CLOSE SYMMETRIC KEY ProjectSymmetricKey;
     </tr>
   </table>
 </body>
+
+***
+## Special thanks
+* For <strong>Dr. Abdallah Alnatsha</strong>on his great efforts during this course!.
