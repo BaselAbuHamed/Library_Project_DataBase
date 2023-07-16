@@ -267,24 +267,7 @@ CLOSE SYMMETRIC KEY ProjectSymmetricKey;
 
 ***
 
-<html>
-<head>
-  <title>SQL User and Role Permissions</title>
-  <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    th, td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-  </style>
-</head>
+
 <body>
   <h2>SQL User and Role Permissions</h2>
   <table>
@@ -386,4 +369,3 @@ CLOSE SYMMETRIC KEY ProjectSymmetricKey;
     </tr>
   </table>
 </body>
-</html>
