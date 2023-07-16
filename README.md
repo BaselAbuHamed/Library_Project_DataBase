@@ -68,24 +68,6 @@ The project aims to streamline operations, enhance customer experiences, and eff
 </body>
 
 ***
-
-<head>
-  <title>AlBayan SQL Triggers</title>
-  <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    th, td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-  </style>
-</head>
 <body>
   <h1>SQL Triggers</h1>
   <table>
